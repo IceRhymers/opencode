@@ -24,6 +24,7 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { isRecord } from "@/util/record"
 import { optionalOmitUndefined } from "@opencode-ai/core/schema"
 import * as ProviderTransform from "./transform"
+import { wrapResponsesSseStream } from "./sse-rewriter"
 import { ModelID, ProviderID } from "./schema"
 import { ModelStatus } from "./model-status"
 import { RuntimeFlags } from "@/effect/runtime-flags"
@@ -1602,8 +1603,16 @@ export const layer = Layer.effect(
             timeout: false,
           })
 
-          if (!chunkAbortCtl) return res
-          return wrapSSE(res, chunkTimeout, chunkAbortCtl)
+          const url = typeof input === "string" ? input : String((input as any)?.url ?? input)
+          const rewritten = wrapResponsesSseStream(res, {
+            url,
+            npm: model.api.npm,
+            rawSse: options["rawSse"] === true,
+            providerID: model.providerID,
+            modelID: model.id,
+          })
+          if (!chunkAbortCtl) return rewritten
+          return wrapSSE(rewritten, chunkTimeout, chunkAbortCtl)
         }
 
         const bundledLoader = BUNDLED_PROVIDERS[model.api.npm]

@@ -7,7 +7,7 @@ type SseEventPayload = Record<string, any>
 /**
  * Rewrite mismatched `item_id` values in Responses-API SSE streams.
  *
- * Some OpenAI-compatible proxies (notably Databricks AI Gateway — see opencode #25487)
+ * Some OpenAI-compatible proxies (notably Databricks AI Gateway)
  * re-encode Responses-API SSE and emit different ids between
  * `response.output_item.added` (item.id) and the subsequent
  * `response.output_text.delta` / `response.content_part.*` events
